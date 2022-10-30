@@ -1,0 +1,23 @@
+{
+  "name": "typeracer-mf",
+  "version": "0.0.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "start:mongo": "docker-compose -f docker-compose.dev.yml up -d",
+    "dev:client": "yarn --cwd ./client dev",
+    "dev:api": "yarn --cwd ./server dev",
+    "install:client": "yarn --cwd ./client",
+    "install:api": "yarn --cwd ./server",
+    "postinstall": "concurrently \"yarn install:client\" \"yarn install:api\"",
+    "dev": "concurrently \"start:mongo\" \"yarn dev:client\" \"yarn dev:api\"",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "stop": "docker-compose -f docker-compose.dev.yml down && docker-compose -f docker-compose.dev.yml rm -f"
+  },
+  "devDependencies": {
+    "concurrently": "^7.5.0"
+  }
+}
