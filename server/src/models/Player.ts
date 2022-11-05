@@ -8,13 +8,18 @@ export interface PlayerAttrs {
   nickname: string;
 }
 
+export type PlayerInit = Pick<
+  PlayerAttrs,
+  "socketID" | "isPartyLeader" | "nickname"
+>;
+
 export interface PlayerDoc extends mongoose.Document, PlayerAttrs {}
 
 interface PlayerModel extends mongoose.Model<PlayerDoc> {
   build(attr: PlayerAttrs): PlayerDoc;
 }
 
-const PlayerSchema = new mongoose.Schema<PlayerAttrs>({
+export const PlayerSchema = new mongoose.Schema<PlayerAttrs>({
   currentWordIndex: {
     type: Number,
     default: 0,
