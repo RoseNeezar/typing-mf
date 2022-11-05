@@ -13,7 +13,7 @@
     "install:client": "yarn --cwd ./client",
     "install:api": "yarn --cwd ./server",
     "postinstall": "concurrently \"yarn install:client\" \"yarn install:api\"",
-    "dev": "concurrently \"start:mongo\" \"yarn dev:client\" \"yarn dev:api\"",
+    "dev": "concurrently \"yarn start:mongo\" \"yarn dev:client\" \"yarn dev:api\"",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "stop": "docker-compose -f docker-compose.dev.yml down && docker-compose -f docker-compose.dev.yml rm -f"
   },

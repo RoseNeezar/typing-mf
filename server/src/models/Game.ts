@@ -1,11 +1,11 @@
 import mongoose from "mongoose";
-import { Player } from "./Player";
+import { Player, PlayerAttrs, PlayerSchema } from "./Player";
 
 export interface GameAttrs {
   words: string;
   isOpen: boolean;
   isOver: boolean;
-  players: [];
+  players: Array<Partial<PlayerAttrs>>;
   startTime: number;
 }
 
@@ -27,7 +27,7 @@ const GameSchema = new mongoose.Schema<GameAttrs>({
     type: Boolean,
     default: false,
   },
-  players: [Player],
+  players: [PlayerSchema],
   startTime: {
     type: Number,
   },
