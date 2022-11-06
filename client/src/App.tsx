@@ -61,9 +61,9 @@ function App() {
               />
             }
           />
-          <Route element={<Wrapper />}>
-            <Route path="/game/:gameID" element={<Game />} />{" "}
-          </Route>
+        </Route>
+        <Route element={<Wrapper />}>
+          <Route path="/game/:gameID" element={<Game />} />
         </Route>
       </Routes>
 
