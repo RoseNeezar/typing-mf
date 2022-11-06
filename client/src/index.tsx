@@ -5,11 +5,11 @@ import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter } from "react-router-dom";
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 60000,
-      cacheTime: 90000,
+      staleTime: Infinity,
       refetchOnMount: false,
       refetchOnWindowFocus: false,
       refetchOnReconnect: false,
