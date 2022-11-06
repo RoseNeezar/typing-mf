@@ -5,8 +5,21 @@ import cors from "cors";
 import http from "http";
 import { Server } from "socket.io";
 import { getQuotesData } from "./service/Quotable";
-import { Game } from "./models/Game";
+import { Game, GameDoc } from "./models/Game";
 import { PlayerInit } from "./models/Player";
+
+type CreateGame = {
+  id: string;
+  nickname: string;
+};
+export interface ServerOnEvents {
+  "create-game": (data: CreateGame) => void;
+  "update-game": (data: GameDoc) => void;
+}
+export interface ServerEmitEvents {
+  "create-game": (data: { id: string; data: GameDoc }) => void;
+  "update-game": (data: GameDoc) => void;
+}
 
 export const createServer = (): Express => {
   const app = express();
@@ -27,7 +40,7 @@ export const createServer = (): Express => {
 };
 
 export const socketServer = (server: http.Server) => {
-  const io = new Server(server, {
+  const io = new Server<ServerOnEvents, ServerEmitEvents>(server, {
     cors: {
       origin: "*",
     },
@@ -37,11 +50,11 @@ export const socketServer = (server: http.Server) => {
     socket.on("create-game", async (data) => {
       try {
         const quotableData = await getQuotesData();
-
+        console.log("What-", data);
         let player: PlayerInit = {
           socketID: socket.id,
           isPartyLeader: true,
-          nickname: data,
+          nickname: data.nickname,
         };
 
         let game = new Game();
@@ -55,7 +68,8 @@ export const socketServer = (server: http.Server) => {
         const gameId = game._id.toString();
         socket.join(gameId);
 
-        io.to(gameId).emit("updateGame", game);
+        io.to(gameId).emit("update-game", game);
+        io.emit("create-game", { id: data.id, data: game });
       } catch (err) {
         console.log(err);
       }

@@ -1,5 +1,10 @@
-import { Formik } from "formik";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "@tanstack/react-query";
+import { useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
 import { z } from "zod";
+import { IState } from "../../../hooks/syncStore";
+import { useSocket } from "../../../util/promiseSocket";
 
 type InputValues = {
   nickname: string;
@@ -12,6 +17,36 @@ const schema = z.object({
 type Props = {};
 
 const CreateGame = (props: Props) => {
+  const navigate = useNavigate();
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<InputValues>({
+    resolver: zodResolver(schema),
+  });
+
+  const { mutateAsync, isLoading } = useMutation(
+    async (data: InputValues) => {
+      return await useSocket.postMessage("create-game", {
+        nickname: data.nickname,
+      });
+    },
+    {
+      onSuccess(p, variables: any, context: any) {
+        const payload = p as unknown as { data: IState["Game"] };
+
+        navigate(`/game/${payload.data._id}`);
+      },
+    }
+  );
+
+  const onSubmit = async (data: InputValues) => {
+    await mutateAsync(data);
+    reset();
+  };
+
   return (
     <div className="text-left bg-gray-600">
       <div className="flex min-h-full">
@@ -32,72 +67,35 @@ const CreateGame = (props: Props) => {
                   </div>
                 </div>
               </div>
-
               <div className="mt-6">
-                <Formik
-                  initialValues={
-                    {
-                      nickname: "",
-                    } as InputValues
-                  }
-                  validate={(values) => {
-                    if (!schema) return;
-                    try {
-                      schema.parse(values);
-                    } catch (error: any) {
-                      return error.formErrors.fieldErrors;
-                    }
-                  }}
-                  onSubmit={async (values, { setSubmitting }) => {
-                    console.log("val-", values.nickname);
-                  }}>
-                  {({
-                    values,
-                    errors,
-                    touched,
-                    handleChange,
-                    handleBlur,
-                    handleSubmit,
-                    isSubmitting,
-                  }) => (
-                    <form
-                      method="POST"
-                      className="space-y-6"
-                      onSubmit={handleSubmit}>
-                      <div>
-                        <label
-                          htmlFor="nickname"
-                          className="block text-sm font-medium text-white">
-                          Nickname
-                        </label>
-                        <div className="mt-1">
-                          <input
-                            id="nickname"
-                            name="nickname"
-                            required
-                            onChange={handleChange}
-                            onBlur={handleBlur}
-                            value={values.nickname}
-                            style={{
-                              border:
-                                !errors.nickname && touched.nickname
-                                  ? ""
-                                  : "2px solid red",
-                            }}
-                            className="block w-full px-3 py-2 placeholder-gray-400 border border-gray-300 rounded-md shadow-sm appearance-none focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                          />
-                        </div>
-                      </div>
-
-                      <button
-                        type="submit"
-                        disabled={isSubmitting}
-                        className="flex justify-center w-full px-4 py-2 text-sm btn btn-primary">
-                        Ok
-                      </button>
-                    </form>
-                  )}
-                </Formik>
+                <form
+                  method="POST"
+                  className="space-y-6"
+                  onSubmit={handleSubmit(onSubmit)}>
+                  <div>
+                    <label
+                      htmlFor="nickname"
+                      className="block text-sm font-medium text-white">
+                      Nickname
+                    </label>
+                    <div className="mt-1">
+                      <input
+                        {...register("nickname")}
+                        style={{
+                          border: !errors.nickname ? "" : "2px solid red",
+                        }}
+                        className="block w-full px-3 py-2 placeholder-gray-400 border border-gray-300 rounded-md shadow-sm appearance-none focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                      />
+                    </div>
+                  </div>
+                  <button
+                    type="submit"
+                    className={`flex justify-center w-full px-4 py-2 text-sm btn btn-primary ${
+                      isLoading && "loading"
+                    }`}>
+                    Ok
+                  </button>
+                </form>
               </div>
             </div>
           </div>
