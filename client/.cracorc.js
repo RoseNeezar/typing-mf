@@ -9,7 +9,7 @@ module.exports = {
   webpack: {
     configure: {
       output: {
-        publicPath: "auto",
+        publicPath: "/",
       },
     },
     module: {
@@ -57,6 +57,7 @@ module.exports = {
   },
   devServer: (devServerConfig, { env, paths }) => {
     devServerConfig = {
+      historyApiFallback: true,
       onBeforeSetupMiddleware: undefined,
       onAfterSetupMiddleware: undefined,
       setupMiddlewares: (middlewares, devServer) => {
