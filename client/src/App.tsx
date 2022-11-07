@@ -38,35 +38,36 @@ function App() {
   const location = useLocation();
   const background = location.state && location.state.background;
   return (
-    <AnimatePresence exitBeforeEnter>
-      <Routes key={"1"} location={background || location}>
-        <Route path="/" element={<Home />}>
-          <Route
-            path="/create-game"
-            element={
-              <ModalPage
-                backPath="/"
-                renderPath="create-game"
-                body={<CreateGame />}
+    <>
+      <AnimatePresence exitBeforeEnter>
+        <Routes key={"1"} location={background || location}>
+          <Route element={<Wrapper />}>
+            <Route path="/" element={<Home />}>
+              <Route
+                path="/create-game"
+                element={
+                  <ModalPage
+                    backPath="/"
+                    renderPath="create-game"
+                    body={<CreateGame />}
+                  />
+                }
               />
-            }
-          />
-          <Route
-            path="/join-game"
-            element={
-              <ModalPage
-                backPath="/"
-                renderPath="join-game"
-                body={<CreateGame />}
+              <Route
+                path="/join-game"
+                element={
+                  <ModalPage
+                    backPath="/"
+                    renderPath="join-game"
+                    body={<CreateGame />}
+                  />
+                }
               />
-            }
-          />
-        </Route>
-        <Route element={<Wrapper />}>
-          <Route path="/game/:gameID" element={<Game />} />
-        </Route>
-      </Routes>
-
+            </Route>
+            <Route path="/game/:gameID" element={<Game />} />
+          </Route>
+        </Routes>
+      </AnimatePresence>
       {background && (
         <Routes key={"2"}>
           <Route
@@ -91,7 +92,7 @@ function App() {
           />
         </Routes>
       )}
-    </AnimatePresence>
+    </>
   );
 }
 
