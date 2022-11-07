@@ -34,7 +34,7 @@ const CreateGame = (props: Props) => {
       });
     },
     {
-      onSuccess(p, variables: any, context: any) {
+      onSuccess(p) {
         const payload = p as unknown as { data: IState["Game"] };
 
         navigate(`/game/${payload.data._id}`);
