@@ -8,17 +8,29 @@ import { getQuotesData } from "./service/Quotable";
 import { Game, GameDoc } from "./models/Game";
 import { PlayerInit } from "./models/Player";
 
+type EmitData = {
+  id: string;
+  data: GameDoc | null;
+};
 type CreateGame = {
   id: string;
+  nickname: string;
+};
+
+type JoinGame = {
+  id: string;
+  gameID: string;
   nickname: string;
 };
 export interface ServerOnEvents {
   "create-game": (data: CreateGame) => void;
   "update-game": (data: GameDoc) => void;
+  "join-game": (data: JoinGame) => void;
 }
 export interface ServerEmitEvents {
-  "create-game": (data: { id: string; data: GameDoc }) => void;
+  "create-game": (data: EmitData) => void;
   "update-game": (data: GameDoc) => void;
+  "join-game": (data: EmitData) => void;
 }
 
 export const createServer = (): Express => {
@@ -46,6 +58,10 @@ export const socketServer = (server: http.Server) => {
     },
   });
 
+  //socket.emit - emit to socket client only (single user thats connected/listening)
+  //io.emit - emit to all connected socket client (multiple user that connected/listening)
+
+  ///6367c44c79d875783a4de3ed
   io.on("connect", (socket) => {
     socket.on("create-game", async (data) => {
       try {
@@ -69,9 +85,41 @@ export const socketServer = (server: http.Server) => {
         socket.join(gameId);
 
         io.to(gameId).emit("update-game", game);
-        io.emit("create-game", { id: data.id, data: game });
+        socket.emit("create-game", { id: data.id, data: game });
       } catch (err) {
         console.log(err);
+      }
+    });
+    socket.on("join-game", async (data) => {
+      try {
+        let game = await Game.findById(data.gameID);
+
+        if (!game) {
+          io.to(data.gameID).emit("join-game", {
+            id: data.id,
+            data: null,
+          });
+
+          return null;
+        }
+
+        if (game?.isOpen) {
+          const gameID = game._id.toString();
+          socket.join(gameID);
+
+          let player: Partial<PlayerInit> = {
+            socketID: socket.id,
+            nickname: data.nickname,
+          };
+
+          game.players.push(player as PlayerInit);
+
+          game = await game.save();
+
+          io.to(gameID).emit("update-game", game);
+        }
+      } catch (error) {
+        console.log(error);
       }
     });
   });
