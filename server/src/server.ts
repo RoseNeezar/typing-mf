@@ -10,7 +10,7 @@ import { PlayerInit } from "./models/Player";
 
 type EmitData = {
   id: string;
-  data: GameDoc | null;
+  data: GameDoc | null | {};
 };
 type CreateGame = {
   id: string;
@@ -92,14 +92,24 @@ export const socketServer = (server: http.Server) => {
     });
     socket.on("join-game", async (data) => {
       try {
+        console.log("Hee-", data);
         let game = await Game.findById(data.gameID);
-
+        console.log("Hee-", data);
         if (!game) {
-          io.to(data.gameID).emit("join-game", {
+          socket.emit("join-game", {
             id: data.id,
             data: null,
           });
 
+          return null;
+        }
+        if (game.players.find((x) => x.nickname === data.nickname)) {
+          socket.emit("join-game", {
+            id: data.id,
+            data: {
+              error: "duplicate nickname",
+            },
+          });
           return null;
         }
 
@@ -117,6 +127,10 @@ export const socketServer = (server: http.Server) => {
           game = await game.save();
 
           io.to(gameID).emit("update-game", game);
+          socket.emit("join-game", {
+            id: data.id,
+            data: game,
+          });
         }
       } catch (error) {
         console.log(error);

@@ -3,17 +3,21 @@ import { v4 as uuidv4 } from "uuid";
 import { io, Socket } from "socket.io-client";
 import { IState, syncStore } from "../hooks/syncStore";
 
-type CreateGame = {
+type JoinGame = {
   id: string;
+  gameID: string;
   nickname: string;
 };
+
 export interface ServerOnEvents {
   "create-game": (data: IState & { id: string }) => void;
   "update-game": (data: IState) => void;
+  "join-game": (data: JoinGame) => void;
 }
 export interface ServerEmitEvents {
   "create-game": (data: { id: string }) => void;
   "update-game": (data: IState) => void;
+  "join-game": (data: Omit<JoinGame, "id">) => void;
 }
 
 export const socket: Socket<ServerOnEvents, ServerEmitEvents> = io(
@@ -31,7 +35,7 @@ export class SocketClient {
 
   private subscribeMessages() {
     socket.on("create-game", (data) => {
-      console.log("get new event: ", data);
+      console.log("create game event: ", data);
       this.emitter.emit(data?.id, data, null);
     });
     socket.on("update-game", (data) => {
@@ -42,6 +46,10 @@ export class SocketClient {
           ...data,
         },
       });
+    });
+    socket.on("join-game", (data) => {
+      console.log("join game event: ", data);
+      this.emitter.emit(data?.id, data, null);
     });
     return () => socket.removeAllListeners();
   }

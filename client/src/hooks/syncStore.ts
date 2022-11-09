@@ -1,7 +1,15 @@
+export type IPlayer = {
+  WPM: number;
+  currentWordIndex: number;
+  isPartyLeader: boolean;
+  nickname: string;
+  socketID: string;
+  _id: string;
+};
 export type GameState = {
   _id: string;
   isOpen: boolean;
-  players: string[];
+  players: IPlayer[];
   words: string[];
 };
 export interface IState {
