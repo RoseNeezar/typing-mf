@@ -5,6 +5,8 @@ import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter } from "react-router-dom";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+
 const el = document.getElementById("root") as HTMLElement;
 const root = createRoot(el);
 const queryClient = new QueryClient({
@@ -24,6 +26,7 @@ root.render(
       <BrowserRouter>
         <App />
       </BrowserRouter>
+      <ReactQueryDevtools />
     </QueryClientProvider>
   </React.StrictMode>
 );
