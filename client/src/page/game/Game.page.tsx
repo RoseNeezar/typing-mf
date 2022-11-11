@@ -20,7 +20,7 @@ const Game = (props: Props) => {
     return <Navigate to="/" replace />;
   }
 
-  return <div>Game</div>;
+  return <div>Type game</div>;
 };
 
 export default Game;
