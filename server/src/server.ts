@@ -92,9 +92,8 @@ export const socketServer = (server: http.Server) => {
     });
     socket.on("join-game", async (data) => {
       try {
-        console.log("Hee-", data);
         let game = await Game.findById(data.gameID);
-        console.log("Hee-", data);
+
         if (!game) {
           socket.emit("join-game", {
             id: data.id,
@@ -103,7 +102,11 @@ export const socketServer = (server: http.Server) => {
 
           return null;
         }
+
         if (game.players.find((x) => x.nickname === data.nickname)) {
+          const gameID = game._id.toString();
+          socket.join(gameID);
+          io.to(gameID).emit("update-game", game);
           socket.emit("join-game", {
             id: data.id,
             data: {

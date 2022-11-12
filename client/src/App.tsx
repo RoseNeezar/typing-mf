@@ -47,6 +47,7 @@ function App() {
                 path="/create-game"
                 element={
                   <ModalPage
+                    isPage={true}
                     backPath="/"
                     renderPath="create-game"
                     body={<CreateGame />}
@@ -57,6 +58,7 @@ function App() {
                 path="/join-game"
                 element={
                   <ModalPage
+                    isPage={true}
                     backPath="/"
                     renderPath="join-game"
                     body={<CreateGame />}
@@ -74,6 +76,7 @@ function App() {
             path="create-game"
             element={
               <ModalPage
+                isPage={true}
                 backPath="/"
                 renderPath="create-game"
                 body={<CreateGame />}
@@ -84,6 +87,7 @@ function App() {
             path="join-game"
             element={
               <ModalPage
+                isPage={true}
                 backPath="/"
                 renderPath="join-game"
                 body={<JoinGame />}

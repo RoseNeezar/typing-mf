@@ -6,6 +6,9 @@ type Props = {
   backPath: string;
   renderPath: string;
   body: React.ReactNode;
+  isPage: boolean;
+  show?: boolean;
+  onClose?: (open: boolean) => void;
 };
 
 const ModalPage = (props: Props) => {
@@ -14,11 +17,16 @@ const ModalPage = (props: Props) => {
   const navigate = useNavigate();
 
   return (
-    <Transition.Root appear show={!!match} as={Fragment}>
+    <Transition.Root
+      appear={props.isPage}
+      show={props.isPage ? !!match : props.show}
+      as={Fragment}>
       <Dialog
         as="div"
         className="relative z-10"
-        onClose={() => navigate(props.backPath)}>
+        onClose={() =>
+          props.isPage ? navigate(props.backPath) : props!.onClose!(true)
+        }>
         <Transition.Child
           as={Fragment}
           enter="ease-out duration-300"

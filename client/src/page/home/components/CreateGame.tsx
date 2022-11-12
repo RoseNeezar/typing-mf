@@ -1,10 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
-import { useNavigate } from "react-router-dom";
 import { z } from "zod";
-import { IState } from "../../../hooks/syncStore";
-import { useSocket } from "../../../util/promiseSocket";
+import { useCreateGame } from "../../../hooks/useApiHooks";
 
 type InputValues = {
   nickname: string;
@@ -17,7 +14,6 @@ const schema = z.object({
 type Props = {};
 
 const CreateGame = (props: Props) => {
-  const navigate = useNavigate();
   const {
     register,
     handleSubmit,
@@ -27,19 +23,7 @@ const CreateGame = (props: Props) => {
     resolver: zodResolver(schema),
   });
 
-  const { mutateAsync, isLoading } = useMutation(
-    async (data: InputValues) => {
-      return await useSocket.postMessage("create-game", {
-        nickname: data.nickname,
-      });
-    },
-    {
-      onSuccess(p) {
-        const payload = p as unknown as { data: IState["Game"] };
-        if (payload.data._id) navigate(`/game/${payload.data._id}`);
-      },
-    }
-  );
+  const { createGame: mutateAsync, createLoading: isLoading } = useCreateGame();
 
   const onSubmit = async (data: InputValues) => {
     await mutateAsync(data);

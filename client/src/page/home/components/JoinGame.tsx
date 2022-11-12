@@ -1,11 +1,8 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation } from "@tanstack/react-query";
-import React from "react";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { useNavigate } from "react-router-dom";
 import { z } from "zod";
-import { IState } from "../../../hooks/syncStore";
-import { useSocket } from "../../../util/promiseSocket";
+import { useJoinGame } from "../../../hooks/useApiHooks";
 type InputValues = {
   nickname: string;
   gameID: string;
@@ -16,39 +13,36 @@ const schema = z.object({
   gameID: z.string().min(5, { message: "Please game id" }),
 });
 
-type Props = {};
+type Props = {
+  gameID?: string;
+  closeModal?: (open: boolean) => void;
+};
 
-const JoinGame = (props: Props) => {
-  const navigate = useNavigate();
+const JoinGame = ({ gameID, closeModal }: Props) => {
   const {
     register,
     handleSubmit,
     reset,
+    setValue,
     formState: { errors },
   } = useForm<InputValues>({
     resolver: zodResolver(schema),
   });
 
-  const { mutateAsync, isLoading } = useMutation(
-    async (data: InputValues) => {
-      return await useSocket.postMessage("join-game", {
-        nickname: data.nickname,
-        gameID: data.gameID,
-      });
-    },
-    {
-      onSuccess(p) {
-        const payload = p as unknown as { data: IState["Game"] };
-        if (payload.data._id) navigate(`/game/${payload.data._id}`);
-      },
-    }
-  );
+  const { joinGame: mutateAsync, joinLoading: isLoading } = useJoinGame();
 
   const onSubmit = async (data: InputValues) => {
-    console.log("sub-", data);
     await mutateAsync(data);
     reset();
+    closeModal && closeModal(false);
   };
+
+  useEffect(() => {
+    if (gameID) {
+      console.log("p-", gameID);
+      setValue("gameID", gameID);
+    }
+  }, [gameID, setValue]);
 
   return (
     <div className="text-left bg-gray-600">
@@ -100,6 +94,7 @@ const JoinGame = (props: Props) => {
                     </label>
                     <div className="mt-1">
                       <input
+                        disabled={!!gameID}
                         {...register("gameID")}
                         className="block w-full px-3 py-2 placeholder-gray-400 border border-gray-300 rounded-md shadow-sm appearance-none focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                         style={{
