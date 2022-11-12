@@ -9,6 +9,7 @@ export type IPlayer = {
 export type GameState = {
   _id: string;
   isOpen: boolean;
+  isOver: boolean;
   players: IPlayer[];
   words: string[];
 };
@@ -36,6 +37,7 @@ export const syncStore = createStore<IState>({
   Game: {
     _id: "",
     isOpen: false,
+    isOver: false,
     players: [],
     words: [],
   },
