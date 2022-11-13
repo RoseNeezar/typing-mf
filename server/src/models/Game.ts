@@ -5,7 +5,7 @@ export interface GameAttrs {
   words: string[];
   isOpen: boolean;
   isOver: boolean;
-  players: PlayerInit[];
+  players: PlayerAttrs[];
   startTime: number;
 }
 

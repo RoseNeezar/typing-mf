@@ -6,7 +6,8 @@ import http from "http";
 import { Server } from "socket.io";
 import { getQuotesData } from "./service/Quotable";
 import { Game, GameDoc } from "./models/Game";
-import { PlayerInit } from "./models/Player";
+import { PlayerAttrs, PlayerInit } from "./models/Player";
+import { calculateWPM } from "./service/utils";
 
 type EmitData = {
   id: string;
@@ -22,15 +23,25 @@ type JoinGame = {
   gameID: string;
   nickname: string;
 };
+
+type UserInput = {
+  id: string;
+  userInput: string;
+  gameID: string;
+};
+
 export interface ServerOnEvents {
   "create-game": (data: CreateGame) => void;
   "update-game": (data: GameDoc) => void;
   "join-game": (data: JoinGame) => void;
+  "user-input": (data: UserInput) => void;
 }
 export interface ServerEmitEvents {
   "create-game": (data: EmitData) => void;
   "update-game": (data: GameDoc) => void;
   "join-game": (data: EmitData) => void;
+  "user-input": (data: EmitData) => void;
+  done: () => void;
 }
 
 export const createServer = (): Express => {
@@ -61,13 +72,12 @@ export const socketServer = (server: http.Server) => {
   //socket.emit - emit to socket client only (single user thats connected/listening)
   //io.emit - emit to all connected socket client (multiple user that connected/listening)
 
-  ///6367c44c79d875783a4de3ed
   io.on("connect", (socket) => {
     socket.on("create-game", async (data) => {
       try {
         const quotableData = await getQuotesData();
         console.log("What-", data);
-        let player: PlayerInit = {
+        let player: Partial<PlayerAttrs> = {
           socketID: socket.id,
           isPartyLeader: true,
           nickname: data.nickname,
@@ -77,7 +87,7 @@ export const socketServer = (server: http.Server) => {
 
         game.words = quotableData;
 
-        game.players.push(player);
+        game.players.push(player as PlayerAttrs);
 
         game = await game.save();
 
@@ -102,10 +112,21 @@ export const socketServer = (server: http.Server) => {
 
           return null;
         }
-
-        if (game.players.find((x) => x.nickname === data.nickname)) {
+        const checkIfPlayerExist = game.players.find(
+          (x) => x.nickname === data.nickname
+        );
+        if (checkIfPlayerExist) {
           const gameID = game._id.toString();
           socket.join(gameID);
+
+          checkIfPlayerExist.socketID = socket.id;
+
+          const foundIndex = game.players.findIndex(
+            (x) => x.nickname === data.nickname
+          );
+          game.players[foundIndex] = checkIfPlayerExist;
+          game = await game.save();
+
           io.to(gameID).emit("update-game", game);
           socket.emit("join-game", {
             id: data.id,
@@ -125,7 +146,7 @@ export const socketServer = (server: http.Server) => {
             nickname: data.nickname,
           };
 
-          game.players.push(player as PlayerInit);
+          game.players.push(player as PlayerAttrs);
 
           game = await game.save();
 
@@ -137,6 +158,58 @@ export const socketServer = (server: http.Server) => {
         }
       } catch (error) {
         console.log(error);
+      }
+    });
+
+    socket.on("user-input", async (data) => {
+      try {
+        let game = await Game.findById(data.gameID);
+
+        if ((game?.isOpen && game?.isOver) || !game) {
+          socket.emit("user-input", {
+            id: data.id,
+            data: game,
+          });
+          return null;
+        }
+
+        let player = game?.players.find((x) => x.socketID === socket.id);
+
+        if (!player) return;
+
+        let word = game?.words[player!.currentWordIndex];
+
+        if (word === data.userInput) {
+          player.currentWordIndex++;
+
+          if (player.currentWordIndex !== game?.words.length) {
+            game = await game.save();
+            socket.emit("user-input", {
+              id: data.id,
+              data: game,
+            });
+            io.to(data.gameID).emit("update-game", game);
+          } else {
+            let endTime = new Date().getTime();
+            let { startTime } = game;
+
+            player.WPM = calculateWPM(endTime, startTime, player);
+            game = await game.save();
+            socket.emit("user-input", {
+              id: data.id,
+              data: game,
+            });
+            socket.emit("done");
+
+            io.to(data.gameID).emit("update-game", game);
+          }
+        }
+        socket.emit("user-input", {
+          id: data.id,
+          data: game,
+        });
+      } catch (error) {
+        console.log("err-", error);
       }
     });
   });
