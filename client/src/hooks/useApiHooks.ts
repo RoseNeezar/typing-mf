@@ -55,3 +55,21 @@ export const useCreateGame = () => {
     createLoading: isLoading,
   };
 };
+
+type IUserInput = {
+  userInput: string;
+  gameID: string;
+};
+
+export const useUserInput = () => {
+  const { mutateAsync, isLoading } = useMutation(async (data: IUserInput) => {
+    return await useSocket.postMessage("user-input", {
+      userInput: data.userInput,
+      gameID: data.gameID,
+    });
+  });
+  return {
+    userInput: mutateAsync,
+    loadingInput: isLoading,
+  };
+};
