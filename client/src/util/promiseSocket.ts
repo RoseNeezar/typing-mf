@@ -9,15 +9,22 @@ type JoinGame = {
   nickname: string;
 };
 
+type UserInput = {
+  userInput: string;
+  gameID: string;
+};
+
 export interface ServerOnEvents {
   "create-game": (data: IState & { id: string }) => void;
   "update-game": (data: IState) => void;
   "join-game": (data: JoinGame) => void;
+  "user-input": (data: IState & { id: string }) => void;
 }
 export interface ServerEmitEvents {
   "create-game": (data: { id: string }) => void;
   "update-game": (data: IState) => void;
   "join-game": (data: Omit<JoinGame, "id">) => void;
+  "user-input": (data: UserInput) => void;
 }
 
 export const socket: Socket<ServerOnEvents, ServerEmitEvents> = io(
@@ -49,6 +56,11 @@ export class SocketClient {
     });
     socket.on("join-game", (data) => {
       console.log("join game event: ", data);
+      this.emitter.emit(data?.id, data, null);
+    });
+    socket.on("user-input", (data) => {
+      console.log("user input event: ", data);
+
       this.emitter.emit(data?.id, data, null);
     });
     return () => socket.removeAllListeners();
