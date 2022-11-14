@@ -7,7 +7,7 @@ import { Server } from "socket.io";
 import { getQuotesData } from "./service/Quotable";
 import { Game, GameDoc } from "./models/Game";
 import { PlayerAttrs, PlayerInit } from "./models/Player";
-import { calculateWPM } from "./service/utils";
+import { calculateWPM, delay } from "./service/utils";
 
 type EmitData = {
   id: string;
@@ -30,17 +30,28 @@ type UserInput = {
   gameID: string;
 };
 
+type KeyInput = {
+  id: string;
+  nickname: string;
+  key: string;
+  gameID: string;
+};
+
 export interface ServerOnEvents {
   "create-game": (data: CreateGame) => void;
   "update-game": (data: GameDoc) => void;
   "join-game": (data: JoinGame) => void;
   "user-input": (data: UserInput) => void;
+  "key-pressed": (data: KeyInput) => void;
+  "remove-key-pressed": (data: KeyInput) => void;
 }
 export interface ServerEmitEvents {
   "create-game": (data: EmitData) => void;
   "update-game": (data: GameDoc) => void;
   "join-game": (data: EmitData) => void;
   "user-input": (data: EmitData) => void;
+  "key-pressed": (data: any) => void;
+  "remove-key-pressed": (data: any) => void;
   done: () => void;
 }
 
@@ -211,6 +222,20 @@ export const socketServer = (server: http.Server) => {
       } catch (error) {
         console.log("err-", error);
       }
+    });
+
+    socket.on("key-pressed", async (data) => {
+      io.to(data.gameID).emit("key-pressed", {
+        id: data.id,
+        data,
+      });
+    });
+
+    socket.on("remove-key-pressed", async (data) => {
+      io.to(data.gameID).emit("remove-key-pressed", {
+        id: data.id,
+        data,
+      });
     });
   });
 };

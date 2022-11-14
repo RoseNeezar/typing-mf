@@ -17,3 +17,7 @@ export const calculateTime = (time: number) => {
   let seconds = time % 60;
   return `${minutes}:${seconds < 10 ? "0" + seconds : seconds}`;
 };
+
+export const delay = (ms: number) => {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+};
