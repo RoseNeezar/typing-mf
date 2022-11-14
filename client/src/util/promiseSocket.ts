@@ -13,18 +13,27 @@ type UserInput = {
   userInput: string;
   gameID: string;
 };
+export type KeyInput = {
+  nickname: string;
+  key: string;
+  gameID: string;
+};
 
 export interface ServerOnEvents {
   "create-game": (data: IState & { id: string }) => void;
   "update-game": (data: IState) => void;
   "join-game": (data: JoinGame) => void;
   "user-input": (data: IState & { id: string }) => void;
+  "key-pressed": (data: { data: KeyInput } & { id: string }) => void;
+  "remove-key-pressed": (data: { data: KeyInput } & { id: string }) => void;
 }
 export interface ServerEmitEvents {
   "create-game": (data: { id: string }) => void;
   "update-game": (data: IState) => void;
   "join-game": (data: Omit<JoinGame, "id">) => void;
   "user-input": (data: UserInput) => void;
+  "key-pressed": (data: KeyInput & { id: string }) => void;
+  "remove-key-pressed": (data: KeyInput & { id: string }) => void;
 }
 
 export const socket: Socket<ServerOnEvents, ServerEmitEvents> = io(
@@ -61,6 +70,39 @@ export class SocketClient {
     socket.on("user-input", (data) => {
       console.log("user input event: ", data);
 
+      this.emitter.emit(data?.id, data, null);
+    });
+    socket.on("key-pressed", (data) => {
+      let newEvent = syncStore.getState().KeyEvents;
+      newEvent.push(data.data);
+
+      syncStore.setState({
+        ...syncStore.getState(),
+        KeyEvents: [...syncStore.getState().KeyEvents, data.data],
+      });
+
+      this.emitter.emit(data?.id, data, null);
+    });
+    socket.on("remove-key-pressed", (data) => {
+      let removeIndex = syncStore
+        .getState()
+        .KeyEvents.findIndex((t) => t.nickname === data.data.nickname);
+
+      if (removeIndex > -1) {
+        let tmp = syncStore.getState().KeyEvents;
+
+        tmp.splice(removeIndex, 1);
+
+        syncStore.setState({
+          ...syncStore.getState(),
+          KeyEvents: syncStore
+            .getState()
+            .KeyEvents.filter(
+              (x) =>
+                x.nickname !== data.data.nickname && x.key !== data.data.key
+            ),
+        });
+      }
       this.emitter.emit(data?.id, data, null);
     });
     return () => socket.removeAllListeners();

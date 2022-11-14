@@ -73,3 +73,23 @@ export const useUserInput = () => {
     loadingInput: isLoading,
   };
 };
+
+type IKeyInput = {
+  nickname: string;
+  key: string;
+  gameID: string;
+};
+
+export const useKeyInput = (key: "key-pressed" | "remove-key-pressed") => {
+  const { mutateAsync, isLoading } = useMutation(async (data: IKeyInput) => {
+    return await useSocket.postMessage(key, {
+      nickname: data.nickname,
+      key: data.key,
+      gameID: data.gameID,
+    });
+  });
+  return {
+    KeyInput: mutateAsync,
+    loadingInput: isLoading,
+  };
+};

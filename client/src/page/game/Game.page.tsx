@@ -52,6 +52,7 @@ const Game = (props: Props) => {
                   words={data.words}
                 />
                 <GameInput
+                  nickname={findPlayer(socket)!.nickname}
                   gameID={data._id}
                   isOpen={data.isOpen}
                   isOver={data.isOver}

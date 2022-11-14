@@ -1,3 +1,5 @@
+import { KeyInput } from "../util/promiseSocket";
+
 export type IPlayer = {
   WPM: number;
   currentWordIndex: number;
@@ -15,6 +17,7 @@ export type GameState = {
 };
 export interface IState {
   Game: GameState;
+  KeyEvents: KeyInput[];
 }
 
 const createStore = <T>(initialState: T) => {
@@ -41,4 +44,5 @@ export const syncStore = createStore<IState>({
     players: [],
     words: [],
   },
+  KeyEvents: [],
 });
