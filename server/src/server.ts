@@ -52,6 +52,7 @@ export interface ServerEmitEvents {
   "user-input": (data: EmitData) => void;
   "key-pressed": (data: any) => void;
   "remove-key-pressed": (data: any) => void;
+  timer: (data: any) => void;
   done: () => void;
 }
 
