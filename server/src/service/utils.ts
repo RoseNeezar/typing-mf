@@ -1,4 +1,8 @@
+import { Server } from "socket.io";
+import { DefaultEventsMap } from "socket.io/dist/typed-events";
+import { Game } from "../models/Game";
 import { PlayerAttrs } from "../models/Player";
+import { ServerOnEvents, ServerEmitEvents } from "../server";
 
 export const calculateWPM = (
   endTime: number,
@@ -20,4 +24,50 @@ export const calculateTime = (time: number) => {
 
 export const delay = (ms: number) => {
   return new Promise((resolve) => setTimeout(resolve, ms));
+};
+
+export const startGameClock = async (
+  gameID: string,
+  io: Server<ServerOnEvents, ServerEmitEvents, DefaultEventsMap, any>
+) => {
+  let game = await Game.findById(gameID);
+  if (!game) return;
+  game.startTime = new Date().getTime();
+
+  game = await game.save();
+
+  let time = 120;
+
+  let timerID = setInterval(() => {
+    if (time >= 0) {
+      const formatTime = calculateTime(time);
+      io.to(gameID).emit("timer", {
+        countDown: formatTime,
+        msg: "Time Remaining",
+      });
+      time--;
+    } else {
+      (async () => {
+        // get time stamp of when the game ended
+        let endTime = new Date().getTime();
+        // find the game
+        let game = await Game.findById(gameID);
+        if (!game) return;
+        // get the game start time
+        let { startTime } = game!;
+        // game is officially over
+        game.isOver = true;
+        // calculate all players WPM who haven't finished typing out sentence
+        game.players.forEach((player, index) => {
+          if (player.WPM === -1)
+            game!.players[index].WPM = calculateWPM(endTime, startTime, player);
+        });
+        // save the game
+        game = await game.save();
+        // send updated game to all sockets within game
+        io.to(gameID).emit("update-game", game);
+        clearInterval(timerID);
+      })();
+    }
+  }, 1000);
 };
