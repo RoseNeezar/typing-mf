@@ -44,6 +44,7 @@ export interface ServerOnEvents {
   "user-input": (data: UserInput) => void;
   "key-pressed": (data: KeyInput) => void;
   "remove-key-pressed": (data: KeyInput) => void;
+  timer: (data: any) => void;
 }
 export interface ServerEmitEvents {
   "create-game": (data: EmitData) => void;
