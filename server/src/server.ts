@@ -251,6 +251,10 @@ export const socketServer = (server: http.Server) => {
 
       let game = await Game.findById(data.gameID);
       if (!game) {
+        socket.emit("timer-start", {
+          id: data.id,
+          data: {},
+        });
         return;
       }
       let player = game.players.find((x) => x._id === data.playerID);
@@ -282,6 +286,10 @@ export const socketServer = (server: http.Server) => {
           }
         }, 1000);
       }
+      socket.emit("timer-start", {
+        id: data.id,
+        data: {},
+      });
     });
   });
 };
