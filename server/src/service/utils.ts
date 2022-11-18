@@ -27,6 +27,7 @@ export const delay = (ms: number) => {
 };
 
 export const startGameClock = async (
+  id: string,
   gameID: string,
   io: Server<ServerOnEvents, ServerEmitEvents, DefaultEventsMap, any>
 ) => {
@@ -41,9 +42,12 @@ export const startGameClock = async (
   let timerID = setInterval(() => {
     if (time >= 0) {
       const formatTime = calculateTime(time);
-      io.to(gameID).emit("timer", {
-        countDown: formatTime,
-        msg: "Time Remaining",
+      io.to(gameID).emit("timer-start", {
+        id,
+        data: {
+          countDown: formatTime,
+          msg: "Time Remaining",
+        },
       });
       time--;
     } else {

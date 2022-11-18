@@ -5,7 +5,7 @@ export interface GameAttrs {
   words: string[];
   isOpen: boolean;
   isOver: boolean;
-  players: PlayerAttrs[];
+  players: Array<PlayerAttrs & { _id?: string }>;
   startTime: number;
 }
 

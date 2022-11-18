@@ -7,11 +7,11 @@ import { Server } from "socket.io";
 import { getQuotesData } from "./service/Quotable";
 import { Game, GameDoc } from "./models/Game";
 import { PlayerAttrs, PlayerInit } from "./models/Player";
-import { calculateWPM, delay } from "./service/utils";
+import { calculateWPM, startGameClock } from "./service/utils";
 
 type EmitData = {
   id: string;
-  data: GameDoc | null | {};
+  data: GameDoc | KeyInput | null | {};
 };
 type CreateGame = {
   id: string;
@@ -37,6 +37,12 @@ type KeyInput = {
   gameID: string;
 };
 
+type TimerStart = {
+  id: string;
+  gameID: string;
+  playerID: string;
+};
+
 export interface ServerOnEvents {
   "create-game": (data: CreateGame) => void;
   "update-game": (data: GameDoc) => void;
@@ -44,16 +50,16 @@ export interface ServerOnEvents {
   "user-input": (data: UserInput) => void;
   "key-pressed": (data: KeyInput) => void;
   "remove-key-pressed": (data: KeyInput) => void;
-  timer: (data: any) => void;
+  "timer-start": (data: TimerStart) => void;
 }
 export interface ServerEmitEvents {
   "create-game": (data: EmitData) => void;
   "update-game": (data: GameDoc) => void;
   "join-game": (data: EmitData) => void;
   "user-input": (data: EmitData) => void;
-  "key-pressed": (data: any) => void;
-  "remove-key-pressed": (data: any) => void;
-  timer: (data: any) => void;
+  "key-pressed": (data: EmitData) => void;
+  "remove-key-pressed": (data: EmitData) => void;
+  "timer-start": (data: EmitData) => void;
   done: () => void;
 }
 
@@ -238,6 +244,44 @@ export const socketServer = (server: http.Server) => {
         id: data.id,
         data,
       });
+    });
+
+    socket.on("timer-start", async (data) => {
+      let countDown = 5;
+
+      let game = await Game.findById(data.gameID);
+      if (!game) {
+        return;
+      }
+      let player = game.players.find((x) => x._id === data.playerID);
+
+      if (player && player.isPartyLeader) {
+        let timerID = setInterval(async () => {
+          if (countDown >= 0) {
+            // emit countDown to all players within game
+            io.to(data.gameID).emit("timer-start", {
+              id: data.id,
+              data: {
+                countDown,
+                msg: "Starting Game",
+              },
+            });
+            countDown--;
+          }
+          // start time clock over, now time to start game
+          else {
+            // close game so no one else can join
+            game!.isOpen = false;
+            // save the game
+            game = await game!.save();
+            // send updated game to all sockets within game
+            io.to(data.gameID).emit("update-game", game);
+            // start game clock
+            startGameClock(data.id, data.gameID, io);
+            clearInterval(timerID);
+          }
+        }, 1000);
+      }
     });
   });
 };
