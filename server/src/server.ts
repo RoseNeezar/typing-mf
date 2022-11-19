@@ -43,6 +43,11 @@ type TimerStart = {
   playerID: string;
 };
 
+type CheckGame = {
+  id: string;
+  gameID: string;
+};
+
 export interface ServerOnEvents {
   "create-game": (data: CreateGame) => void;
   "update-game": (data: GameDoc) => void;
@@ -51,6 +56,7 @@ export interface ServerOnEvents {
   "key-pressed": (data: KeyInput) => void;
   "remove-key-pressed": (data: KeyInput) => void;
   "timer-start": (data: TimerStart) => void;
+  "check-game": (data: CheckGame) => void;
 }
 export interface ServerEmitEvents {
   "create-game": (data: EmitData) => void;
@@ -60,7 +66,8 @@ export interface ServerEmitEvents {
   "key-pressed": (data: EmitData) => void;
   "remove-key-pressed": (data: EmitData) => void;
   "timer-start": (data: EmitData) => void;
-  done: () => void;
+  "game-end": () => void;
+  "check-game": (data: EmitData) => void;
 }
 
 export const createServer = (): Express => {
@@ -218,7 +225,7 @@ export const socketServer = (server: http.Server) => {
               id: data.id,
               data: game,
             });
-            socket.emit("done");
+            socket.emit("game-end");
 
             io.to(data.gameID).emit("update-game", game);
           }
@@ -250,6 +257,7 @@ export const socketServer = (server: http.Server) => {
       let countDown = 5;
 
       let game = await Game.findById(data.gameID);
+
       if (!game) {
         socket.emit("timer-start", {
           id: data.id,
@@ -257,7 +265,9 @@ export const socketServer = (server: http.Server) => {
         });
         return;
       }
-      let player = game.players.find((x) => x._id === data.playerID);
+      let player = game.players.find(
+        (x) => x._id!.toString() === data.playerID
+      );
 
       if (player && player.isPartyLeader) {
         let timerID = setInterval(async () => {
@@ -289,6 +299,27 @@ export const socketServer = (server: http.Server) => {
       socket.emit("timer-start", {
         id: data.id,
         data: {},
+      });
+    });
+
+    socket.on("check-game", async (data) => {
+      let game = await Game.findById(data.gameID);
+
+      if (!game) {
+        socket.emit("check-game", {
+          id: data.id,
+          data: false,
+        });
+      }
+      if (game?.isOver) {
+        socket.emit("check-game", {
+          id: data.id,
+          data: false,
+        });
+      }
+      socket.emit("check-game", {
+        id: data.id,
+        data: true,
       });
     });
   });

@@ -1,7 +1,7 @@
 import EventEmitter from "events";
 import { v4 as uuidv4 } from "uuid";
 import { io, Socket } from "socket.io-client";
-import { IState, syncStore } from "../hooks/syncStore";
+import { IState, syncStore, TimerState } from "../hooks/syncStore";
 
 type JoinGame = {
   id: string;
@@ -13,10 +13,15 @@ type UserInput = {
   userInput: string;
   gameID: string;
 };
+
 export type KeyInput = {
   nickname: string;
   key: string;
   gameID: string;
+};
+type TimerStart = {
+  id: string;
+  data: TimerState;
 };
 
 export interface ServerOnEvents {
@@ -26,6 +31,9 @@ export interface ServerOnEvents {
   "user-input": (data: IState & { id: string }) => void;
   "key-pressed": (data: { data: KeyInput } & { id: string }) => void;
   "remove-key-pressed": (data: { data: KeyInput } & { id: string }) => void;
+  "timer-start": ({ id, data }: TimerStart) => void;
+  "game-end": () => void;
+  "check-game": (data: { id: string; data: boolean }) => void;
 }
 export interface ServerEmitEvents {
   "create-game": (data: { id: string }) => void;
@@ -34,6 +42,9 @@ export interface ServerEmitEvents {
   "user-input": (data: UserInput) => void;
   "key-pressed": (data: KeyInput & { id: string }) => void;
   "remove-key-pressed": (data: KeyInput & { id: string }) => void;
+  "timer-start": ({ id, data }: TimerStart) => void;
+  "game-end": () => void;
+  "check-game": (data: string) => void;
 }
 
 export const socket: Socket<ServerOnEvents, ServerEmitEvents> = io(
@@ -105,6 +116,37 @@ export class SocketClient {
       }
       this.emitter.emit(data?.id, data, null);
     });
+
+    socket.on("timer-start", async (data) => {
+      if (data.data.countDown === "0:00") {
+        syncStore.setState({
+          ...syncStore.getState(),
+          TimerEvents: {},
+        });
+      } else {
+        syncStore.setState({
+          ...syncStore.getState(),
+          TimerEvents: {
+            ...syncStore.getState().TimerEvents,
+            ...data.data,
+          },
+        });
+      }
+      this.emitter.emit(data?.id, data, null);
+    });
+
+    socket.on("game-end", () => {
+      syncStore.setState({
+        ...syncStore.getState(),
+        TimerEvents: {},
+      });
+      socket.removeAllListeners("timer-start");
+    });
+
+    socket.on("check-game", (data) => {
+      this.emitter.emit(data?.id, data.data, null);
+    });
+
     return () => socket.removeAllListeners();
   }
 
