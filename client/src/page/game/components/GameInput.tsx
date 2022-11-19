@@ -63,7 +63,7 @@ const GameInput = (props: Props) => {
     <div className="mt-5 text-center">
       <input
         type="text"
-        // readOnly={props.isOpen || props.isOver}
+        readOnly={props.isOpen || props.isOver}
         onKeyDown={handleKeyDown}
         onKeyUp={handleKeyUp}
         onChange={handleInput}
