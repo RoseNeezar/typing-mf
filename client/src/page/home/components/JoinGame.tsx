@@ -39,7 +39,6 @@ const JoinGame = ({ gameID, closeModal }: Props) => {
 
   useEffect(() => {
     if (gameID) {
-      console.log("p-", gameID);
       setValue("gameID", gameID);
     }
   }, [gameID, setValue]);
