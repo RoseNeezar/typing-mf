@@ -39,7 +39,7 @@ export const startGameClock = async (
 
   let time = 120;
 
-  let timerID = setInterval(() => {
+  const startTimer = async () => {
     if (time >= 0) {
       const formatTime = calculateTime(time);
       io.to(gameID).emit("timer-start", {
@@ -73,5 +73,7 @@ export const startGameClock = async (
         clearInterval(timerID);
       })();
     }
-  }, 1000);
+  };
+
+  let timerID = setInterval((() => startTimer)(), 1000);
 };
