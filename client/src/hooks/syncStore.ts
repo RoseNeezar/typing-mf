@@ -15,9 +15,15 @@ export type GameState = {
   players: IPlayer[];
   words: string[];
 };
+
+export type TimerState = {
+  countDown: string;
+  msg: string;
+};
 export interface IState {
   Game: GameState;
   KeyEvents: KeyInput[];
+  TimerEvents: TimerState | {};
 }
 
 const createStore = <T>(initialState: T) => {
@@ -45,4 +51,5 @@ export const syncStore = createStore<IState>({
     words: [],
   },
   KeyEvents: [],
+  TimerEvents: {},
 });
