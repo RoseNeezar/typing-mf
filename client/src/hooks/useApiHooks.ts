@@ -1,4 +1,4 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { useSocket } from "../util/promiseSocket";
 import { IState } from "./syncStore";
@@ -91,5 +91,39 @@ export const useKeyInput = (key: "key-pressed" | "remove-key-pressed") => {
   return {
     KeyInput: mutateAsync,
     loadingInput: isLoading,
+  };
+};
+
+type IStartGame = {
+  playerID: string;
+  gameID: string;
+};
+
+export const useStartGame = () => {
+  const { mutateAsync, isLoading } = useMutation(async (data: IStartGame) => {
+    return await useSocket.postMessage("timer-start", {
+      playerID: data.playerID,
+      gameID: data.gameID,
+    });
+  });
+  return {
+    startGame: mutateAsync,
+    loadingGame: isLoading,
+  };
+};
+
+type ICheckGame = {
+  gameID: string;
+};
+
+export const useCheckGame = (gameID: string) => {
+  const { data, isLoading } = useQuery([gameID], async () => {
+    return await useSocket.postMessage("check-game", {
+      gameID,
+    });
+  });
+  return {
+    checkGame: data as unknown as boolean,
+    loadingCheckGame: isLoading,
   };
 };
