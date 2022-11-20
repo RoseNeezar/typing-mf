@@ -7,7 +7,7 @@ import { Server } from "socket.io";
 import { getQuotesData } from "./service/Quotable";
 import { Game, GameDoc } from "./models/Game";
 import { PlayerAttrs, PlayerInit } from "./models/Player";
-import { calculateWPM, startGameClock } from "./service/utils";
+import { calculateWPM, startGameClock, TimerID } from "./service/utils";
 
 type EmitData = {
   id: string;
@@ -102,7 +102,7 @@ export const socketServer = (server: http.Server) => {
     socket.on("create-game", async (data) => {
       try {
         const quotableData = await getQuotesData();
-        console.log("What-", data);
+
         let player: Partial<PlayerAttrs> = {
           socketID: socket.id,
           isPartyLeader: true,
@@ -225,6 +225,8 @@ export const socketServer = (server: http.Server) => {
               id: data.id,
               data: game,
             });
+
+            clearInterval(TimerID.getTimerID() as NodeJS.Timeout);
             socket.emit("game-end");
 
             io.to(data.gameID).emit("update-game", game);
@@ -254,22 +256,23 @@ export const socketServer = (server: http.Server) => {
     });
 
     socket.on("timer-start", async (data) => {
+      socket.emit("timer-start", {
+        id: data.id,
+        data: {},
+      });
+
       let countDown = 5;
 
       let game = await Game.findById(data.gameID);
 
       if (!game) {
-        socket.emit("timer-start", {
-          id: data.id,
-          data: {},
-        });
         return;
       }
       let player = game.players.find(
         (x) => x._id!.toString() === data.playerID
       );
 
-      if (player && player.isPartyLeader) {
+      if (player && player.isPartyLeader && !game.isOver) {
         let timerID = setInterval(async () => {
           if (countDown >= 0) {
             // emit countDown to all players within game
@@ -296,10 +299,6 @@ export const socketServer = (server: http.Server) => {
           }
         }, 1000);
       }
-      socket.emit("timer-start", {
-        id: data.id,
-        data: {},
-      });
     });
 
     socket.on("check-game", async (data) => {

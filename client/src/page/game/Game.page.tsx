@@ -48,7 +48,7 @@ const Game = (props: Props) => {
       <div className="m-4">
         <div className="py-8 border mockup-window bg-base-300">
           <div className="flex flex-col min-h-16">
-            <div className="relative flex items-center justify-center">
+            <div className="relative flex items-center justify-center mb-10">
               <div className="absolute top-0 left-0 flex flex-row p-3 mx-3 rounded-lg bg-primary w-fit h-fit">
                 <div className="mr-3 font-bold">Name:</div>
                 <div className="font-semibold">
@@ -70,7 +70,7 @@ const Game = (props: Props) => {
                 {data.isOpen && currentPlayer?.isPartyLeader && (
                   <GameStartBtn gameID={gameID} player={currentPlayer!} />
                 )}
-                {!data.isOver && (
+                {currentPlayer.WPM === -1 && (
                   <GameProgressBar
                     player={currentPlayer!}
                     players={data.players}

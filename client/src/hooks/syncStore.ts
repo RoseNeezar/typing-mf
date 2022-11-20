@@ -53,3 +53,15 @@ export const syncStore = createStore<IState>({
   KeyEvents: [],
   TimerEvents: {},
 });
+
+export const ResetStore: IState = {
+  Game: {
+    _id: "",
+    isOpen: false,
+    isOver: false,
+    players: [],
+    words: [],
+  },
+  KeyEvents: [],
+  TimerEvents: {},
+};
