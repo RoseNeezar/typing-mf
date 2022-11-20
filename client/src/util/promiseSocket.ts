@@ -42,7 +42,7 @@ export interface ServerEmitEvents {
   "user-input": (data: UserInput) => void;
   "key-pressed": (data: KeyInput & { id: string }) => void;
   "remove-key-pressed": (data: KeyInput & { id: string }) => void;
-  "timer-start": ({ id, data }: TimerStart) => void;
+  "timer-start": (data: { playerID: string; gameID: string }) => void;
   "game-end": () => void;
   "check-game": (data: string) => void;
 }
@@ -62,7 +62,6 @@ export class SocketClient {
 
   private subscribeMessages() {
     socket.on("create-game", (data) => {
-      console.log("create game event: ", data);
       this.emitter.emit(data?.id, data, null);
     });
     socket.on("update-game", (data) => {
@@ -75,12 +74,9 @@ export class SocketClient {
       });
     });
     socket.on("join-game", (data) => {
-      console.log("join game event: ", data);
       this.emitter.emit(data?.id, data, null);
     });
     socket.on("user-input", (data) => {
-      console.log("user input event: ", data);
-
       this.emitter.emit(data?.id, data, null);
     });
     socket.on("key-pressed", (data) => {
@@ -140,7 +136,6 @@ export class SocketClient {
         ...syncStore.getState(),
         TimerEvents: {},
       });
-      socket.removeAllListeners("timer-start");
     });
 
     socket.on("check-game", (data) => {
@@ -153,7 +148,7 @@ export class SocketClient {
   async postMessage<T>(
     event: keyof ServerEmitEvents,
     data: T,
-    timeout = 3000
+    timeout = 5000
   ): Promise<T> {
     const res = new Promise<T>((resolve, reject) => {
       const id = uuidv4();

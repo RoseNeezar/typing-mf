@@ -30,7 +30,7 @@ const GameScore = (props: Props) => {
           <tbody>
             {scoreBoard.map((player, index) => {
               return (
-                <tr>
+                <tr key={index}>
                   <th scope="row">{index + 1}</th>
                   <td>{player.nickname}</td>
                   <td>{player.WPM}</td>
