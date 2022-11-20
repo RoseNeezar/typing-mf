@@ -226,7 +226,16 @@ export const socketServer = (server: http.Server) => {
               data: game,
             });
 
-            clearInterval(TimerID.getTimerID() as NodeJS.Timeout);
+            const gameStatus = game.players
+              .map((x) => x.WPM)
+              .filter((x) => x === -1);
+
+            if (gameStatus.length === 0) {
+              clearInterval(TimerID.getTimerID() as NodeJS.Timeout);
+              game.isOver = true;
+              game = await game.save();
+            }
+
             socket.emit("game-end");
 
             io.to(data.gameID).emit("update-game", game);

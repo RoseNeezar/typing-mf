@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useKeyInput, useUserInput } from "../../../hooks/useApiHooks";
+import { useKeyInput } from "../../../hooks/useApiHooks";
+import { socket } from "../../../util/promiseSocket";
 
 type Props = {
   isOpen: boolean;
@@ -11,7 +12,6 @@ type Props = {
 const GameInput = (props: Props) => {
   const [input, setInput] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
-  const { userInput } = useUserInput();
   const { KeyInput: onKey } = useKeyInput("key-pressed");
   const { KeyInput: offKey } = useKeyInput("remove-key-pressed");
 
@@ -21,7 +21,7 @@ const GameInput = (props: Props) => {
     let lastChar = value.charAt(value.length - 1);
 
     if (lastChar === " ") {
-      await userInput({
+      socket.emit("user-input", {
         userInput: input,
         gameID: props.gameID,
       });
