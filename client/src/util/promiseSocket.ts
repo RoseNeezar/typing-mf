@@ -114,6 +114,14 @@ export class SocketClient {
     });
 
     socket.on("timer-start", async (data) => {
+      const currentPlayer = syncStore
+        .getState()
+        .Game.players.find((p) => p.socketID === socket.id);
+
+      if (currentPlayer && currentPlayer?.WPM > -1) {
+        this.emitter.emit(data?.id, data, null);
+        return;
+      }
       if (data.data.countDown === "0:00") {
         syncStore.setState({
           ...syncStore.getState(),
