@@ -1,5 +1,5 @@
-// const { ModuleFederationPlugin } = require("webpack").container;
-// const deps = require("./package.json").dependencies;
+const { ModuleFederationPlugin } = require("webpack").container;
+const deps = require("./package.json").dependencies;
 const fs = require("fs");
 const NodePolyfillPlugin = require("node-polyfill-webpack-plugin");
 const evalSourceMap = require("react-dev-utils/evalSourceMapMiddleware");
@@ -9,7 +9,7 @@ module.exports = {
   webpack: {
     configure: {
       output: {
-        publicPath: "/",
+        publicPath: "auto",
       },
     },
     module: {
@@ -33,25 +33,25 @@ module.exports = {
         new NodePolyfillPlugin({
           excludeAliases: ["console"],
         }),
-        // new ModuleFederationPlugin({
-        //   name: "workspace-mf",
-        //   filename: "remoteEntry.js",
-        //   remotes: {},
-        //   shared: {
-        //     ...deps,
-        //     tsconfig: {
-        //       singleton: true,
-        //     },
-        //     react: {
-        //       singleton: true,
-        //       requiredVersion: deps.react,
-        //     },
-        //     "react-dom": {
-        //       singleton: true,
-        //       requiredVersion: deps["react-dom"],
-        //     },
-        //   },
-        // }),
+        new ModuleFederationPlugin({
+          name: "typeracer",
+          filename: "remoteEntry.js",
+          exposes: {
+            "./Typeracer": "./src/bootstrap",
+          },
+          remotes: {},
+          shared: {
+            ...deps,
+            react: {
+              singleton: true,
+              requiredVersion: deps.react,
+            },
+            "react-dom": {
+              singleton: true,
+              requiredVersion: deps["react-dom"],
+            },
+          },
+        }),
       ],
     },
   },

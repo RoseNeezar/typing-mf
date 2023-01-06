@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "craco start",
+    "dev": "PORT=4000 craco  start",
     "build": "craco build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
