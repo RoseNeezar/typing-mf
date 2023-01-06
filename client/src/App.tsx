@@ -1,10 +1,7 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { FC } from "react";
 import { Outlet, Route, Routes, useLocation } from "react-router-dom";
-import ModalPage from "./components/ModalPage";
 import Game from "./page/game/Game.page";
-import CreateGame from "./page/home/components/CreateGame";
-import JoinGame from "./page/home/components/JoinGame";
 import Home from "./page/home/Home.page";
 
 export const Wrapper: FC = () => {
@@ -28,7 +25,8 @@ export const Wrapper: FC = () => {
         type: "spring",
         damping: 10,
         stiffness: 50,
-      }}>
+      }}
+    >
       <Outlet />
     </motion.div>
   );
@@ -43,7 +41,7 @@ function App() {
         <Routes key={"1"} location={background || location}>
           <Route element={<Wrapper />}>
             <Route path="/" element={<Home />}>
-              <Route
+              {/* <Route
                 path="/create-game"
                 element={
                   <ModalPage
@@ -64,13 +62,14 @@ function App() {
                     body={<CreateGame />}
                   />
                 }
-              />
+              /> */}
             </Route>
             <Route path="/game/:gameID" element={<Game />} />
+            {/* <Route path="/" element={<Navigate replace to={`/scrumpoker`} />} /> */}
           </Route>
         </Routes>
       </AnimatePresence>
-      {background && (
+      {/* {background && (
         <Routes key={"2"}>
           <Route
             path="create-game"
@@ -95,7 +94,7 @@ function App() {
             }
           />
         </Routes>
-      )}
+      )} */}
     </>
   );
 }

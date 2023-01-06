@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { Player, PlayerAttrs, PlayerInit, PlayerSchema } from "./Player";
+import { PlayerAttrs, PlayerSchema } from "./Player";
 
 export interface GameAttrs {
   words: string[];
