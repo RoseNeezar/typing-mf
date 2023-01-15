@@ -48,7 +48,9 @@ export interface ServerEmitEvents {
 }
 
 export const socket: Socket<ServerOnEvents, ServerEmitEvents> = io(
-  "http://localhost:5030"
+  process.env.REACT_APP_SOCKET_URL
+    ? process.env.REACT_APP_SOCKET_URL
+    : "http://localhost:5030"
 );
 
 export class SocketClient {

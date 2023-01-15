@@ -1,6 +1,7 @@
 {
   "name": "typeracer-api",
   "version": "0.0.0",
+  "main": "index.js",
   "private": true,
   "scripts": {
     "test": "jest --detectOpenHandles",
