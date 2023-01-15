@@ -11,7 +11,7 @@ module.exports = {
   webpack: {
     configure: {
       output: {
-        publicPath: `${process.env.PUBLIC_PATH}`,
+        publicPath: `${process.env.REACT_APP_PUBLIC_PATH}`,
       },
     },
     module: {

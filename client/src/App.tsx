@@ -32,6 +32,16 @@ export const Wrapper: FC = () => {
   );
 };
 
+const NotFound = () => {
+  return (
+    <div className="bg-dark-main flex h-screen items-center justify-center">
+      <div className="bg-dark-third rounded-lg p-10 text-xl font-bold tracking-widest text-white">
+        Lost ??
+      </div>
+    </div>
+  );
+};
+
 function App() {
   const location = useLocation();
   const background = location.state && location.state.background;
@@ -42,6 +52,8 @@ function App() {
           <Route element={<Wrapper />}>
             <Route path="/" element={<Home />}></Route>
             <Route path="/game/:gameID" element={<Game />} />
+            <Route path="*" element={<NotFound />} />
+
             {/* <Route path="/" element={<Navigate replace to={`/scrumpoker`} />} /> */}
           </Route>
         </Routes>
