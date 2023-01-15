@@ -1,6 +1,6 @@
 version: "3.5"
 services:
-  mongo:
+  typeracer-mongo:
     image: "mongo:latest"
     command: mongod
     ports:
@@ -8,3 +8,23 @@ services:
     environment:
       - MONGO_INITDB_ROOT_USERNAME=root
       - MONGO_INITDB_ROOT_PASSWORD=example
+  typeracer-api:
+    depends_on:
+      - typeracer-mongo
+    build:
+      dockerfile: Dockerfile.dev
+      context: ./server
+    env_file:
+      - .env
+    volumes:
+      - /app/node_modules
+      - ./server:/app
+  typeracer-nginx:
+    restart: always
+    build:
+      dockerfile: Dockerfile.dev
+      context: ./nginx
+    ports:
+      - "5030:80"
+volumes:
+  app:

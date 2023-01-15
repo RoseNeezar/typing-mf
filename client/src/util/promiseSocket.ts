@@ -48,7 +48,7 @@ export interface ServerEmitEvents {
 }
 
 export const socket: Socket<ServerOnEvents, ServerEmitEvents> = io(
-  "http://localhost:5001"
+  "http://localhost:5030"
 );
 
 export class SocketClient {

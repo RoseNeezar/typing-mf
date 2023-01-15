@@ -1,3 +1,4 @@
+require("dotenv").config({ path: "./.env" });
 const { ModuleFederationPlugin } = require("webpack").container;
 const deps = require("./package.json").dependencies;
 const fs = require("fs");
@@ -5,11 +6,12 @@ const NodePolyfillPlugin = require("node-polyfill-webpack-plugin");
 const evalSourceMap = require("react-dev-utils/evalSourceMapMiddleware");
 const redirectServedPath = require("react-dev-utils/redirectServedPathMiddleware");
 const noopServiceWorker = require("react-dev-utils/noopServiceWorkerMiddleware");
+
 module.exports = {
   webpack: {
     configure: {
       output: {
-        publicPath: "auto",
+        publicPath: `${process.env.PUBLIC_PATH}`,
       },
     },
     module: {
