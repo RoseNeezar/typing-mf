@@ -1,7 +1,6 @@
 import React, { FC } from "react";
 import "./index.css";
 import App from "./App";
-import reportWebVitals from "./reportWebVitals";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter } from "react-router-dom";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
@@ -17,11 +16,11 @@ const queryClient = new QueryClient({
     },
   },
 });
-const Client: FC<{ mf?: boolean }> = ({ mf }) => {
+const Client: FC<{ mf?: string }> = ({ mf }) => {
   return (
     <React.StrictMode>
       <QueryClientProvider client={queryClient}>
-        <BrowserRouter basename={mf ? "/typeracer" : "/typeracer"}>
+        <BrowserRouter basename={mf ? `/${mf}` : "/"}>
           <App />
         </BrowserRouter>
         <ReactQueryDevtools />
@@ -34,15 +33,15 @@ const Client: FC<{ mf?: boolean }> = ({ mf }) => {
 // to log results (for example: reportWebVitals(console.log))
 // or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
 
-const Mount = (el: HTMLElement) => {
+const Mount = (el: HTMLElement, mf?: string) => {
   ReactDOM.createRoot(el).render(
     <React.StrictMode>
-      <Client mf={true} />
+      <Client mf={mf} />
     </React.StrictMode>
   );
 };
 
-const devRoot = document.getElementById("root") as HTMLElement;
+const devRoot = document.getElementById("typeracer-root") as HTMLElement;
 
 if (devRoot) {
   Mount(devRoot);

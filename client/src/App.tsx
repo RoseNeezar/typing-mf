@@ -40,61 +40,12 @@ function App() {
       <AnimatePresence exitBeforeEnter>
         <Routes key={"1"} location={background || location}>
           <Route element={<Wrapper />}>
-            <Route path="/" element={<Home />}>
-              {/* <Route
-                path="/create-game"
-                element={
-                  <ModalPage
-                    isPage={true}
-                    backPath="/"
-                    renderPath="create-game"
-                    body={<CreateGame />}
-                  />
-                }
-              />
-              <Route
-                path="/join-game"
-                element={
-                  <ModalPage
-                    isPage={true}
-                    backPath="/"
-                    renderPath="join-game"
-                    body={<CreateGame />}
-                  />
-                }
-              /> */}
-            </Route>
+            <Route path="/" element={<Home />}></Route>
             <Route path="/game/:gameID" element={<Game />} />
             {/* <Route path="/" element={<Navigate replace to={`/scrumpoker`} />} /> */}
           </Route>
         </Routes>
       </AnimatePresence>
-      {/* {background && (
-        <Routes key={"2"}>
-          <Route
-            path="create-game"
-            element={
-              <ModalPage
-                isPage={true}
-                backPath="/"
-                renderPath="create-game"
-                body={<CreateGame />}
-              />
-            }
-          />
-          <Route
-            path="join-game"
-            element={
-              <ModalPage
-                isPage={true}
-                backPath="/"
-                renderPath="join-game"
-                body={<JoinGame />}
-              />
-            }
-          />
-        </Routes>
-      )} */}
     </>
   );
 }
