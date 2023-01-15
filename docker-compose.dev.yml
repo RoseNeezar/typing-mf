@@ -2,9 +2,9 @@ version: "3.5"
 services:
   typeracer-mongo:
     image: "mongo:latest"
-    command: mongod
+    command: mongod --port 27020
     ports:
-      - "27017:27017"
+      - "27020:27020"
     environment:
       - MONGO_INITDB_ROOT_USERNAME=root
       - MONGO_INITDB_ROOT_PASSWORD=example

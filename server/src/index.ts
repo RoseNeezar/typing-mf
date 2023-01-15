@@ -5,7 +5,7 @@ const port = process.env.PORT || 5011;
 
 const start = async () => {
   try {
-    await mongoose.connect("mongodb://root:example@typeracer-mongo:27017", {
+    await mongoose.connect("mongodb://root:example@typeracer-mongo:27020", {
       useNewUrlParser: true,
       useCreateIndex: true,
       useFindAndModify: false,
